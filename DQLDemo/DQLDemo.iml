@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="DQLDemo [file:/home/amitabh/code/github/home/DQL/]" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/target/scala-2.12/classes" />
+    <output-test url="file://$MODULE_DIR$/target/scala-2.12/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/target/scala-2.12/src_managed/main" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/target/scala-2.12/src_managed/test" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/scala" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="DSLCommon" exported="" />
+    <orderEntry type="library" name="sbt: com.google.guava:guava:21.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.0.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.12.7:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.antlr:stringtemplate:3.2.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.antlr:antlr-runtime:3.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.antlr:antlr:3.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.antlr:ST4:4.0.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-io:commons-io:2.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-codec:commons-codec:1.12:jar" level="project" />
+    <orderEntry type="library" name="sbt: antlr:antlr:2.7.7:jar" level="project" />
+    <orderEntry type="module" module-name="iris-reasoner" exported="" />
+    <orderEntry type="module" module-name="XDSLToDatalog" exported="" />
+    <orderEntry type="module" module-name="XDSLLoader" exported="" />
+    <orderEntry type="module" module-name="TrapCommon" exported="" />
+    <orderEntry type="module" module-name="DSLToXDSL" exported="" />
+    <orderEntry type="library" scope="TEST" name="sbt: com.google.jimfs:jimfs:1.1:jar" level="project" />
+    <orderEntry type="module" module-name="DSLAnalyzer" exported="" />
+    <orderEntry type="library" name="sbt: com.opencsv:opencsv:3.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-beanutils:commons-beanutils:1.9.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-collections:commons-collections:3.2.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: commons-logging:commons-logging:1.1.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.commons:commons-lang3:3.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.slf4j:slf4j-api:1.7.26:jar" level="project" />
+    <orderEntry type="module" module-name="sbt-template" exported="" />
+    <orderEntry type="library" name="sbt: bsf:bsf:2.4.0:jar" level="project" />
+  </component>
+</module>
