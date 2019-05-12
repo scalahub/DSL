@@ -31,13 +31,14 @@ object Base64 {
 // copied directly from common.Util (end)
 
 object DQLUtil {
+  val rand = scala.util.Random.nextInt.abs
   lazy val dqlDir = {
     //    val dir = System.getProperty("user.home")+"/.dql"
     //    createDir(dir)
-    val dir = "/tmp/dql"
+    val dir = s"/tmp/dql_$rand"
     createDir(dir)
     if (!isDir(dir)) {
-      val altDir = "tmp"
+      val altDir = s"tmp_$rand"
       createDir(altDir)
       altDir
     } else dir
@@ -330,7 +331,7 @@ $ruleStr
     checkBasisExists    
     val tableNames = optConfig.get.reducedBasis.map(_.factName) // tail removes '#' 
     if (!tableNames.contains(tableName)) throw new Exception(s"no such table $tableName in basis")
-    val factFile = dqlDir+"/"+tableName+".facts"    
+    val factFile = dqlDir+"/"+tableName+s".facts"
     if (fileExists(factFile) && readBinaryFileToBytes(factFile).size > 0) throw new Exception(s"non-empty output file exists: $factFile")
     populateFacts(tableName, file, factFile)
   }

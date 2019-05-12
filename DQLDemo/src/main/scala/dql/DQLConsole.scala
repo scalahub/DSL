@@ -65,7 +65,7 @@ object DQLConsole {
               val remaining = array1(1)        
               command match {
                 case "run" => 
-                  val commands = trap.file.Util.readTextFileToString(remaining).lines
+                  val commands = trap.file.Util.readTextFileToString(remaining).lines.map(_.trim).filterNot(_ == "")
                   commands.flatMap{command =>
                     Seq("-------", command) ++ dqlReplCode(command)
                   }.toSeq
@@ -107,7 +107,9 @@ object DQLConsole {
         }
       }
     } catch {
-      case any:Any => s" ** ${any.getClass.getSimpleName}: ${any.getMessage} **"
+      case any:Any =>
+        any.printStackTrace
+        s" ** ${any.getClass.getSimpleName}: ${any.getMessage} **"
     }
   }
   val console = new REPLConsole(dqlReplCode, 1000, Seq("exit", "q"), "DQL console")
@@ -121,7 +123,7 @@ object DQLConsole {
   }
   def main(s:Array[String]):Unit = {
     console.start
-    System.exit(1)
+    System.exit(0)
   }
   def onDataReceive(data:String):Unit = console.pushString("received "+data)
   
