@@ -28,20 +28,21 @@ lazy val XDSLLoader = (project in file("XDSLLoader")).settings(
 ).dependsOn(TrapCommon, DSLCommon)
 
 lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
+//To refer to a local repository
 //lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
 
-// https://stackoverflow.com/a/38917522/243233
+// Sub-projects can be accessed as follows:
+// From https://stackoverflow.com/a/38917522/243233
 //lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
 //lazy val IrisParser = ProjectRef(uri("../iris-reasoner"), "parser")
 
 lazy val DatalogSolver = (project in file("DatalogSolver")).settings(
   libraryDependencies += "commons-io" % "commons-io" % "2.6 "
-).dependsOn(XDSLLoader, 
+).dependsOn(
+  XDSLLoader, 
   TrapCommon,
-  IrisReasoner
   //IrisParser,
-  //IrisImpl,
-  //IrisAPI
+  IrisReasoner
 )
 
 
@@ -76,7 +77,6 @@ lazy val DQLDemo = (project in file("DQLDemo")).settings(
 
 lazy val root = (project in file(".")).settings(
   mainClass in assembly := Some("dql.DQLConsole"),
-  // set the name of the project
   name := "DQL"
 ).dependsOn(
   DQLDemo
