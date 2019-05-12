@@ -1,0 +1,3 @@
+reducedBasis=Users(userID:String[userID], firstName:String, lastName:String, time:Int, balance:Int, salary:Int);
+extendedBasis=
+

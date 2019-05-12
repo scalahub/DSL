@@ -1,0 +1,9 @@
+load basis users.basis
+load #Users users.csv
+map :a as $userID => #Users;
+find #Users
+find #Users:a
+
+
+
+
