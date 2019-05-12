@@ -9,7 +9,7 @@ A DQL query consists of either `def` or `find` statements. A few example of DQL 
     def #SQLInjection as #DataFlow where {@source = #web and @dest = #sql}
     find #SQLInjection
 
-The complete grammar of DQL is given here: https://github.com/CxSci/acc/blob/master/DQL/DSLToXDSL/src/DSL.g
+The complete grammar of DQL is given [here](https://github.com/scalahub/DQL/blob/master/DSLToXDSL/src/main/scala/DSL.g "here").
 
 # Mapping 
 
@@ -37,7 +37,7 @@ The query would return something like:
     temp2(12, 'WebController.java', '<>', 14, 'UserType.java').
     temp2(16, 'OrderLoader.java', '<>', 19, 'OrderProcess.java').
 	
-The complete grammar of Mapping is given here: https://github.com/CxSci/acc/blob/master/DQL/DSLToXDSL/src/Mapping.g
+The complete grammar of Mapping is given [here](https://github.com/scalahub/DQL/blob/master/DSLToXDSL/src/main/scala/Mapping.g "here").
 # DQL Implementation
 DQL compiler is written in Scala using ANTLR3 and works as follows:
 
@@ -47,35 +47,25 @@ DQL compiler is written in Scala using ANTLR3 and works as follows:
 
 # Building DQL
 
-A precompiled binary is available at: https://www.dropbox.com/s/ecmawccsvgfub4y/DQLDemo.jar?dl=1
-
 To build DQL yourself (in Linux), clone the repo and install:
 
-	1. JDK 7+
-	2. Scala 2.11+
-	3. Ant
+	1. JDK 8+
+	3. SBT
 	
-Then set `SCALA_HOME` (example, via `export SCALA_HOME=/scala` command), change to the directory DQL and give the command:
+Then change to the directory DQL and give the command:
 	
-	build.sh
-
-The final binaries will reside in `DQLDemo/dist`.
-
-To run, change to the DQLDemo folder and issue the command:
-
-	java -jar dist/DQLDemo.jar
+	sbt package
 
 # DQL Demo
 
 Do the following steps to get an hand-on session with DQL. 
 
-1. Start DQL console using `java -jar dist/DQLDemo.jar`. Type `help` in the console to see available commands.
+1. Start DQL console using `sbt run`. Type `help` in the console to see available commands.
 
 2. Define a basis table by typing the following in DQL console:
 `table Users(userID:String[userID], firstName:String, lastName:String, time:Int, balance:Int, salary:Int);`
 
-3. The file `users.csv` contains sample data for the above table. Ensure that this file is in your current folder. This file is available here: 
-https://github.com/CxSci/acc/blob/master/DQL/DQLDemo/users.csv
+3. The file `users.csv` contains sample data for the above table. Ensure that this file is in your current folder.
 
 4. Load the table using the console command:
 `load #Users users.csv`
@@ -88,17 +78,7 @@ https://github.com/CxSci/acc/blob/master/DQL/DQLDemo/users.csv
 `find #Users:userName`
 `find #Users:userName where {@firstName ~ 'A*'}`
 
-For more information and syntax of DQL, see the documentation at this link: https://github.com/CxSci/acc/blob/master/DQL/docs/dsl.pdf
-
-Note: DQL stores imported data in `~/.dql` folder. 
-        
-# DQL Compiler Details
-
-TheDQL compiler is written in Scala using ANTLR3 and works as follows:
-
-1. First it converts DQL to an intermediate representation called XDSL (the X stands for XML)
-2. XDSL is validated against the initial domain specific configuration. 
-3. XDSL is converted to Datalog to be used by a Datalog engine.
+For more information and syntax of DQL, see the documentation at this [link](http://github.com/scalahub/DQL/blob/master/docs/dsl.pdf "link").
 
 # Projects related to DQL
 
@@ -110,15 +90,3 @@ The following projects are related to DQL:
 4. DatalogSolver: process a Datalog query
 5. DQLAnalyzer: connects the above projects together
 6. DQLDemo: full demo of DQL query engine
-
-# Projects related to JDQL 
-
-(JDQL is an demo application of DQL for static analysis of Java)
-
-1. JILToDatalog: converts JIL (Java Intermediate Language) code to Datalog. JIL is an intermediate representation of Soot.
-2. JavaToDatalog: converts Java to Datalog by first converting to JIL using Soot and then using JILToDatalog converter.
-3. JDQLAnalyzer: Analyzes the Java code against the supplied DQL code
-
-JDQL is described in the paper **JDQL: A Framework for Java Static Analysis** (link https://www.dropbox.com/s/3qpse8s8o1z2net/jdql.pdf?dl=0
-
-An online demo of JDQL is at: http://jdql-amitabh123.rhcloud.com/
