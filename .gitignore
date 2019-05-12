@@ -1,4 +1,6 @@
+*.iml
 */target/
+**/*.bak
 **/target
 */branches/
 .DS_Store
@@ -6,3 +8,5 @@
 /.project
 /.settings
 /lib
+.idea
+
