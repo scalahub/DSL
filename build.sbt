@@ -2,10 +2,21 @@ name := "DQL"
 
 version := "0.1"
 
+//scalaVersion := "2.11.8"
 scalaVersion := "2.12.8"
 
 lazy val BeanShell = RootProject(uri("https://github.com/scalahub/BeanShell.git"))
 //lazy val BeanShell = RootProject(uri("../BeanShell"))
+
+lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
+
+// To refer to a local repository
+//lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
+
+// Sub-projects can be accessed as follows:
+// From https://stackoverflow.com/a/38917522/243233
+//lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
+//lazy val IrisParser = ProjectRef(uri("../iris-reasoner"), "parser")
 
 lazy val TrapCommon = (project in file("TrapCommon")).settings(
   libraryDependencies += "commons-codec" % "commons-codec" % "1.12",
@@ -26,15 +37,6 @@ lazy val DSLCommon = (project in file("DSLCommon")).settings(
 lazy val XDSLLoader = (project in file("XDSLLoader")).settings(
   libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
 ).dependsOn(TrapCommon, DSLCommon)
-
-lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
-//To refer to a local repository
-//lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
-
-// Sub-projects can be accessed as follows:
-// From https://stackoverflow.com/a/38917522/243233
-//lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
-//lazy val IrisParser = ProjectRef(uri("../iris-reasoner"), "parser")
 
 lazy val DatalogSolver = (project in file("DatalogSolver")).settings(
   libraryDependencies += "commons-io" % "commons-io" % "2.6 "
