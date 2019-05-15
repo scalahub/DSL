@@ -1,0 +1,99 @@
+\subsection{Result Mapping}
+
+%\textbf{Results Mapping:} 
+A DQL \texttt{find} query returns the primary or pattern keys of the pattern. These can be considered as unique row IDs. The query \texttt{\small \underline{find \#users where \{\#state.@capital = `Boston`\}}} could, for example, return following keys of type \texttt{[userID]}:\\
+{\small
+	\texttt{\phantom{~}user01}% \\
+	%\texttt{\phantom{~}user1367} \\
+%	\texttt{\phantom{~}user04} 
+}
+
+These are not meaningful to end-users. The above row IDs can be mapped to meaningful values using a {\em Result Mapping}. %, also defined by the data owner. 
+%For instance, in a query returning userIDs, the result mapping might instead cause it to return user names. 
+As an example, the following lines define various result mappings from \texttt{userID}:\\
+{\small
+	\texttt{\phantom{~}map :a as \$userID => \#users // all public columns} \\
+	\texttt{\phantom{~}map :b as \$userID => \#users.@name // name}\\
+	\texttt{\phantom{~}map :c as \$userID => \#users.@age.avg // avg of age}
+%	\texttt{\phantom{~}map :d as \$userID => \#users.@age.max // max of age}\\
+%	\texttt{\phantom{~}map :e as \$userID => \#users.count // all row count}
+%	\texttt{\phantom{~}map :f as \$userID => \#users.@age.count // distinct(age) count}
+}
+
+We can then specify a mapping in the = query as follows:\\ 
+\texttt{\small \underline{find \#users:a where \{\#state.@capital = `Boston`\}}}. The query would then return the following:\\
+{\small
+	\texttt{\phantom{~}name |age}\\
+	\texttt{\phantom{~}----------|------}\\
+	\texttt{\phantom{~}Homer|45 }%\\
+%	\texttt{\phantom{~}Bart |11}  
+}
+
+The grammar for mapping is given in Appendix~\ref{mapping}.
+%
+%Similarly, \texttt{\small \underline{find \#users:c where \{\#state.@capital = `Springfield`\}}} would output:\\
+%{\small
+%\texttt{\phantom{~}28}  
+%}
+
+\section{Restricting Queries}
+
+\textbf{Constraint Language:} In OPAL, we also need a way to restrict the type of queries to prevent data leakage. This is done by constraining the kind of DQL queries allowed. We can, for example, restrict certain columns of certain  patterns (e.g., {\em age} in pattern {\em users}) and the operations on those columns (cannot do $<, >, \geq, \leq, \neq$). Additionally, the result mapping can be used to restrict the final view of the query results.
+
+When specifying constraints, instead of following the standard blacklist approach ({\em deny these and allow rest}), we follow a whitelist one ({\em allow these and deny rest}). 
+Thus, the constraints define the allowed (rather than denied) queries, and are usually created by the data-owner. If no constraints are specified, then all queries are disallowed. As an example, 
+the following allows DQL queries that access the column {\em age} of pattern {users} with the operations $=, \neq$:\\
+\texttt{\phantom{~}~ageConstraint: \#users.@age: =, !=}
+
+
+%That is, we specify what type of queries are allowed a
+
+When making a query, the following needs to be specified:
+\begin{enumerate}
+	\item A set $Q$ of DQL queries of \texttt{def} and \texttt{find} statements.
+	\item A set $C$ of whitelist constraints that accept the queries.
+	\item An set $R$ of result mappings, one for each \texttt{find} query. 	
+\end{enumerate}
+
+
+
+%DQL also allows constraints to be placed which queries a pattern can be used in (set by the owner of the pattern), and how a pattern can be combined with other patterns).
+
+%\begin{tabular}{ l c r }
+%DQL & SQL & Datalog \\\hline
+%Pattern & Table or view & Relation \\
+%Query & SQL & Rule \\
+%\end{tabular}
+
+%Comparison between concepts in DQL, SQL and Datalog.
+
+\section{Conclusion}
+\label{conclusion}
+
+%Datalog is a language for querying deductive databases. However, it has has an obscure syntax. 
+%This makes it difficult to maintain and verify Datalog rules. 
+We described \dslfull~(\dsl), a DSL that automates the generation and maintenance of generic database queries in a human-friendly syntax. [...]
+ 
+%Unlike similar tools, \dsl~is domain-independent and does not have pre-defined relations. Instead, a domain-expert defines such relations via the {\em basis} and {\em initial rules}.  
+%The \dsl~compiler 
+%outputs only safe rules~\cite{revesz1990closed} and 
+%\dsl~provides correctness guarantees due to type-checking and validation. % of initial rules against the basis.
+
+%\dsl~can be used in any domain where Datalog is used. One example is static analysis~\cite{Whaley:2005:UDB:2099708.2099719,dataloganalysis11,
+%Huang:2011:DEA:1989323.1989456,
+%Lam:2005:CPA:1065167.1065169,
+%saxena13soql}.
+%,pql,Crew:1997:ALE:1267950.1267968,
+%cq,
+%jqry}. 
+%To this end, we presented a static analysis framework for Java using \dsl, which we call J\dsl. We showed how various bug-patterns (such as SQL injection) can be succinctly expressed in J\dsl. Since the framework works on bytecode (in addition to source), it can also be used for other JVM-based languages. 
+
+%Some potential enhancements to \dsl~are:
+%%Some possible enhancements of \dsl~are given below:
+%\begin{enumerate}
+	%\item Use rule-rewriting. 
+	%%~\cite{DBLP:journals/toplas/LiuS09}. 
+	%For example, in joins, several rules can be combined to avoid extra computation.
+	%\item Use Binary Decision Diagrams for efficiency as in~\cite{Whaley:2005:UDB:2099708.2099719}. 
+	%%\item Use Datalog with aggregates, such as a `count'. % (e.g., \cite{datomic}). 
+%\end{enumerate}

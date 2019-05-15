@@ -1,0 +1,50 @@
+\section{Semantic Restrictions} 
+\label{semantic}
+		The following rules and restrictions must be followed with respect to the basis and \dsl~code.
+\begin{enumerate}
+	\item A basis table has at least one primary/secondary key and returns all its primary/secondary keys, with the exceptions described in Section~\ref{patternkeys}.
+	%\item 
+	\item A basis table cannot have both primary and secondary keys. Thus, a basis table with secondary key(s) is non-traversable.
+	Using the definitions of Section~\ref{reducedbasis}, the following code will give an error:\\
+	\texttt{\small \colorbox{Light}{def \#foo as \bfseries\#parent where \{\#person.@name='Homer'\}}}
+	
+This is because \texttt{\#parent} is non-traversable.
+	%All other patterns must be traversible.   
+	\item There cannot be multiple traversal paths in the basis. 
+	The following \dcl~code will give an error:\\
+{\small
+\dclcode{person(persID:String[pID],~name:String,~age:Int,~city:String)}\\
+\dclcode{works(persID:String[pID],corpID:String[cID],empID:String)}\\
+\dclcode{corp(corpID:String[cID],~name:String,~founderID:String[pID])}
+}
+
+This is because there are two paths from \texttt{[pID]} to \texttt{[cID]}; one via \texttt{\#works} and another via \texttt{\#corp}. Such relations can be modeled using secondary keys. As an example, the following is valid \dcl~code:\\%a valid \dcl~configuration achieving essentially the same thing:\\
+	{\small
+\dclcode{person(persID:String[pID],~name:String,~age:Int,~city:String)}\\
+\dclcode{works(persID:String\{pID\},corpID:String\{cID\},empID:String)}\\
+\dclcode{corp(corpID:String[cID],~name:String,~founderID:String[pID])}
+}
+	\item Two tables can be merged (using \texttt{and}/\texttt{or}/\texttt{not}/\texttt{xor}) if only if their returned keys are identical. Using the basis defined in Section~\ref{reducedbasis}, the following will, therefore, give an error: \texttt{\small \colorbox{Light}{def \#foo as \bfseries{\{\#person and \#corp\}}}},
+		
+as \texttt{\#person} returns \texttt{[pID]}, while \texttt{\#corp} returns \texttt{[cID]}.
+%Note that even %the %key types %(primary/secondary) 
+%and their 
+%ordering must be identical.
+	\item A user-defined table returns the key(s) of its parent table(s). Therefore, a user-defined table is traversable if and only if its parents are traversable. As an example, \texttt{\#fromAcme} of Section~\ref{primarykeys} is traversable and we can write:\\ %\\\\
+	\texttt{\small \colorbox{Light}{def \#emp1 as \bfseries\#fromAcme where \{\#works.@empID='1'\}}}
+	
+	\item Type restrictions are enforced in \dsl. Therefore, for example, using the definition of Section~\ref{primarykeys}, the following will given an error because an attribute of type \texttt{String} cannot be mapped to an \texttt{Int}.\\
+	\texttt{\small \colorbox{Light}{def \#emp1 as \bfseries\#fromAcme where \{\#works.@empID = 1\}}}
+\end{enumerate}
+
+\textbf{Selecting The Basis.} %The basis must satisfy the above restrictions. 
+First set the reduced basis to represent the initial data.
+%, hiding some tables if needed (using `!'). 
+Then set the extended basis for other relations that may be needed. If there are loops in traversal, make some tables non-traversable by using secondary keys. Finally, make those tables non-traversable whose attributes need to map to other tables. 
+
+A basis table can be hidden from the user using `!' as in:\\
+\dclcode{works!(persID:String[pID],corpID:String[cID], empID:String)}.
+
+Such hidden tables cannot be used in DQL. However, they might be used internally for traversal.
+
+%Hidden tables is useful for intermediate definitions. 

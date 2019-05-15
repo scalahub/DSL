@@ -1,0 +1,19 @@
+%\paragraph{\dsl~Compiler:} 
+%\paragraph{Configuration Validation.}\label{para:rulevalidation}
+%The configuration is validated to eliminate any errors in the basis or the initial rule definitions. Appendix~\ref{validation} describes the various checks.
+%\paragraph{Compilation and Optimization.}\label{compiler}
+%The compiler converts \dsl~code into Datalog rules that can be fed to a Datalog engine. 
+%The compiler is written entirely in Scala 
+%~\cite{Odersky:2011:PSC:1983576} 
+%Initially \dsl~code is parsed into an AST 
+%using ANTLR~\cite{antlr}. %, which is then used to generate the Datalog code. 
+%Section~\ref{compilerlogic} describes the compilation logic of \dsl. %In addition, %\dsl~additionally provides the following optimizations: 
+%\begin{itemize}
+%	\item 
+%{\em Rule filtering} %Rule filtering 
+	%is used to avoid evaluating unnecessary rules. From the initial Datalog rules, only the rules reachable from the queries are evaluated.  
+%	\item 
+%{\em 
+%Magic Sets:} 
+%Magic sets}~\cite{Bancilhon:1985:MSO:6012.15399} are used to avoid generating unnecessary facts. %The latter optimization is provided by the IRIS engine itself. 
+%\end{itemize}

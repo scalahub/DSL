@@ -1,0 +1,93 @@
+\section{\dsl~Grammar in ANTLR}
+\label{grammar}
+
+The \dsl~compiler is written in Scala using ANTLR~v3~\cite{antlr}, a tool for generating parsers. The following is the \dsl~grammar, created using ANTLRWorks (\url{www.antlr3.org/works}). 
+%The following is the grammar for \dsl~in ANTLR~\cite{antlr}, a popular tool for generating parsers. 
+\begin{small}
+\begin{verbatim}
+//  Lexer rules start with uppercase letter
+//  Parser rules start with lowercase letter.
+//  
+// .. creates a character range
+// + means "repeat one or more times". 
+// * means "repeat zero or more times".    
+// ? means "optional" (i.e., "repeat zero or one time")
+// | means "or"    
+
+tables:       'tables' ID ':' (define|find)* EOF;
+find:         'find' simpleMatch;
+define:       'def' TABLE 'as' tableMatch;
+tableMatch:   simpleMatch | ('{' complexMatch '}');
+simpleMatch:  TABLE filter?;
+complexMatch: tableMatch boolMatch tableMatch;
+filter:       'where' '{' rule '}';
+rule:         simpleRule | complexRule;
+mixedRule:    simpleRule | ('(' complexRule ')');
+simpleRule:   attValStr | attValInt | attValTab | attValAtt;
+complexRule:  mixedRule bool mixedRule;
+boolMatch:    bool | 'not' | 'xor';
+bool:         'and' | 'or';
+attValStr:    ATT opStr STRING;
+attValInt:    ATT opInt INT;
+attValAtt:    ATT opEq ATT;
+attValTab:    ATT opEq TABLE;
+opEq:         '=' | '!=';
+opInt:        opEq | '<=' | '>=' | '<' | '>' ;
+opStr:        opEq | '~' | '~~';
+ATT:          '@' ID | (TABLE '.' '@' ID);
+TABLE:        '#' ID;
+//ID,STRING,INT are defaults defined with AntlrWorks
+//ID: anything starting with non-number, INT: number
+//STRING: Anything enclosed in single quotes
+\end{verbatim}
+%(www.antlr3.org/works)
+\end{small}
+\section{Datalog Configuration}
+\label{basis}
+A \dsl~database uses Datalog as its underlying query engine. Thus, advanced users familiar with Datalog can make additional use of its powerful features (such as recursion). Recall that the basis is the set of initial table schema. Here we describe how the basis can be enhanced with Datalog. First we split the basis into a {\em reduced basis} and an {\em extended basis}. The reduced basis is essentially the schema of tables mapping to the externally supplied raw data. The extended basis is derived from the reduced basis via Datalog rules and does not correspond to externally supplied data. We explain this by extending the earlier examples.
+
+\subsection{Reduced basis}
+\label{reducedbasis} 
+Let us enumerate the basis tables for the examples of Sections~\ref{description} and \ref{configuration}: \\
+{\small
+	\dclcode{\phantom{1}~~~person(persID:String[pID], name:String, age:Int, city:String)}\\
+	\dclcode{\phantom{1}~~~works(persID:String[pID], firmID:String[cID], empID:String)}\\
+	\dclcode{\phantom{1}~~~corp(corpID:String[cID], name:String, founder:String)}\\
+	\dclcode{\phantom{1}~~~parent(person:String\{pID\}, child:String\{pID\})}
+}
+
+The data for these tables is supplied by the user. All such tables form the  {\em reduced basis}.
+
+\subsection{Extended Basis}
+\label{extendedbasis} 
+Suppose we need to define tables for siblings and ancestors. %, which cannot be done from \dsl. Therefore, 
+Let us add them to the basis via \dcl:\\
+{\small
+	\dclcode{\phantom{1}~~~sibling(left:String\{pID\}, right:String\{pID\})}\\
+	\dclcode{\phantom{1}~~~ancestor(ancestor:String\{pID\}, descendant:String\{pID\})}
+}
+
+Their data can be inferred from the reduced basis and should not be user-supplied. These form the {\em extended basis}.
+
+\subsection{Initial Rules}
+\label{datalogrules}
+
+Since the extended basis does not contain data, using it in \dsl~will return no results. 
+Therefore, some rules need to be supplied to populate it using the reduced basis. These are the {\em initial rules}. 
+
+In the case of Datalog, our initial rules would be:\\
+{\small
+	\texttt{\phantom{1}~~~sibling(x,y) :- parent(p,x),~parent(p,y),~x != y.}\\
+	\texttt{\phantom{1}~~~ancestor(x,y) :- parent(x,y).}\\
+	\texttt{\phantom{1}~~~ancestor(x,y) :- ancestor(x,a), ancestor(a,y).}
+}
+
+In the case of SQL, our initial rules would map to views:\\
+{\small
+	\texttt{\phantom{1}~~~sibling(x,y) :- parent(p,x),~parent(p,y),~x != y.}\\
+	\texttt{\phantom{1}~~~ancestor(x,y) :- parent(x,y).}\\
+	\texttt{\phantom{1}~~~ancestor(x,y) :- ancestor(x,a), ancestor(a,y).}
+}
+
+Once the reduced basis, the extended basis and the initial rules are defined, the configuration is complete. The configuration is validated as described in Appendix~\ref{semantic}.
+

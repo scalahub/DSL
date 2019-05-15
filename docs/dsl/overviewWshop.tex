@@ -1,0 +1,171 @@
+\section{Introduction}
+
+The OPAL project aims to enable competing organizations to come together and share data in order to achieve some common goal. The health sector (for instance cancer research) seems to me one benefactor of such technology. Data sharing in clinical trials for cancer research is governed by strict privacy laws and consequently a large amount of time and money is spent on repetitions of trials generating similar data. If such data was already available, many of these tests could be skipped. Thus, any data-sharing in such scenarios has to go through extensive scrutiny for possible leakage. Not only does this entail technical skills but also legal expertise. OPAL aims to address this issue by requiring:
+%OPAL addresses this issue by requring that 
+\begin{enumerate}
+	\item Queries should return only aggregate answers and never information about individual rows.
+	\item Only vetted queries should be allowed. A vetter would publish templates of allowed queries.
+	\item A query auditor analyzes queries created from the vetted templates to ensure no private information is leaked.
+	\item The entire transaction of query/response is be recorded in a blockchain for audit trails.
+\end{enumerate}
+
+%A query auditor is a program that takes in a query along with a sequence of past query-responses and decides if the response to the current query can leak any sensitive data.
+\subsection{Query Auditing}
+The following definitions are taken from the literature. A {\em dataset} is a set $X$ of labeled real numbers $\{x_i, x_2,\ldots x_n\}$ where $n$ is public. 
+A query $q$ consists of a pair $(f, s)$, where $f\in \{\textsf{max}, \textsf{min}, \textsf{avg}, \textsf{sum}\}$ representing the aggregate functions and $s\in[1..n]$. 
+The response to $q$ is a real number representing the aggregate applied on the subset of $X$ defined by $s$. An {\em offline auditor} takes in a sequence of query-responses and decides if the responses leak any sensitive data. An {\em online auditor} takes in a sequence of query-responses and additionally a query $q$ along with its response $r$ to decide if $r$ might leak sensitive data (it does not care if the past responses leaked information). If an online auditor decides that $r$ leaks information then $r$ can be denied. However, as shown in~\cite{auditor}, the very act of denying a response can leak information. A {\em simulable auditor} is an online auditor that takes this decision without looking at $r$. Hence, an adversary can also simulate the auditor's role and we can be ensured that denials do not leak information. 
+
+The concept of information leakage is either captured via {\em full disclosure}, where an adversary is able to compute some or all of $x_i$s or {\em partial disclosure}, where the adversary is able to narrow down on the range of some (or all) $x_i$s. Note that the full disclosure definition is too weak to be useful in practice because even if the adversary cannot compute the exact value, a narrow enough range may be sufficient for leakage. On the other hand, partial disclosure is too strong to be achievable in practice, because every useful query must leak {\em some} range information. Note that we do not consider the trivial case of denying all queries since that indeed achieves resistance against partial disclosures.
+
+\subsection{Query Vetting in OPAL}
+
+OPAL uses slightly modified definitions. An {OPAL dataset} is a set $X$ of labeled real numbers $\{x_i, x_2,\ldots x_n\}$ where $n$ is \textbf{secret}. An OPAL query $q$ consists of a pair $(g, t)$, where $g\in \{\textsf{max}, \textsf{min}, \textsf{avg}, \textsf{sum}, \textsf{count}\}$ representing the aggregate functions and $t\in A$ for some $A\subsetneq 2^{[1..n]}$, the power set of $[1..n]$. We call $A$ the {\em set of allowed queries} of $X$. 
+
+An {\em OPAL query template} is a mapping from the data set $X$ to an allowed query set $A$. An {\em OPAL vetter} is responsible for defining the query template, while an {\em OPAL auditor} decides if a given query $q$ is indeed an element of $A$.
+%vetted queries, query aditors
+
+The OPAL definition are more usable because typical queries such as \texttt{select max(age) from users where state = 'MA'} do not allow the adversary to select arbitrary subsets of $X$ but rather those defined by a filter (\texttt{state = 'MA'}). Thus, one approach to query vetting would be to restrict the filters that can be applied. For instance, a filter to ensure that $n$ remains secret would need to ensure that the adversary can never select all or exclude a fixed number of elements from a query set.
+
+\subsection{OPAL Query Language}
+
+In order to define such a query framework and filter rules for allowed queries, we use a query language called DQL, which is specifically designed for working with sets and filters. The prototype implementation of DQL uses Datalog as its underlying query engine but adapters for converting to standard SQL can be created. The key point is that once a DQL query is considered safe by a vetter or auditor, we don't have to worry about vetting the corresponding SQL or another low-level query. Hence we can focus our security analysis on DQL while perform the actual query in another language if needed. 
+
+\section{Overview of DQL}
+
+\dsl~is a language for querying structured data stored in a set of {\em tables}. A table in \dsl~is called a {\em pattern}. 
+A pattern has a name, a {\em schema} describing the data and zero or more rows containing the data. %Thus, a pattern directly maps to a table in SQL or a relation in Datalog. 
+Pattern names start with \texttt{\#}, such as \texttt{\#users}. 
+\dsl~queries are of two types: a \texttt{def} query defines new patterns (similar to creating views in SQL) and a \texttt{find} query returns row IDs of a pattern (similar to a select query in SQL). 
+
+%Using DQL, a programmer can define new tables from the initial ones (using a \texttt{def} query) and finally obtain the results of a desired table (using a \texttt{find} query).
+%Under the hood, \dsl~uses Datalog and it is useful (but not necessary) for the reader to have some knowledge of it. Appendix~\ref{datalog-intro} gives a brief overview of Datalog.
+\textbf{Schema:} A data store makes its data available by first publishing the schema in \dcl~(\dclfull), an example of which is: 
+
+%For instance, a SQL database will expose certain tables (or a view of them) via initial patterns defined using PDL.
+%DQL queries can combine PDL code from several data stores and present a combined view to the querier (who may not even be aware that each initial pattern maps to a table in a different database).
+
+{\small
+	\dclcode{users(name:String, userID:String[uID], stateID:String[sID], age:Int)}\\
+	\dclcode{state(name:String, id:String[sID], capital:String)}
+}
+
+The above defines two patterns \texttt{\#users} and \texttt{\#state} with various attributes. Additionally, the \texttt{stateID} attribute of \texttt{\#users} and the \texttt{id} attribute
+of \texttt{\#state} can be used in a join because they map to the common key \texttt{[sID]}. This published schema is called the {\em basis}. 
+
+\textbf{Comparing with SQL:} Since \dsl~is strictly a query language, it does not provide methods to insert or update rows. However, note that a \dsl~\texttt{def} query is 
+equivalent to creating a view in SQL. Similar to SQL, \dsl~is a {\em set algebra}, a language that operates on sets and provides the ability to perform operations on arbitrary subsets of those sets. In SQL however, the programmers needs to specify {\em how} to do the operations by specifying the joins. In \dsl, the joins are automatically inferred, allowing the programmer to focus on {\em what} rather than {\em how}. As an example, the \dsl:\\
+\texttt{\phantom{~}find \#users where \{\#state.@capital = `Springfield`\}} 
+
+can map to the SQL:\\
+\texttt{\phantom{~}select * from users where }\\
+\texttt{\phantom{~}~~~~~~~~~~user.stateID = state.stateID and}\\
+\texttt{\phantom{~}~~~~~~~~~~state.capital = 'Springfield'}.
+
+The joins are automatically inferred from the DQL schema.
+%The PDL \dclcode{Users(name:String, agE:Int)} defines a SQL table Users(name VARCHAR(255), age INT)
+%Compared to SQL, we have constrained DQL 
+%can be mapped to any SQL or Datalog nderlying database. 
+
+DQL is expressive enough to represent all necessary relationships found in most SQL databases and additionally allows recursive rules to be defined 
+
+%There are two ways to use \dsl~with OPAL. One is to write an adapter for \dsl~and each database. A second and more pragmatic solution would be to use a database engine that directly accepts \dsl~queries. As a proof of concept for the second approach, we have implemented a database engine called Open\dsl~that accepts structured data in CSV format and uses \dsl~as its query language. 
+
+%Under the hood, Open\dsl~uses Datalog and it is useful (but not necessary) for the reader to have some knowledge of it. Appendix~\ref{datalog-intro} gives a brief overview of Datalog.
+ 
+ %Open\dsl~internally uses Datalog for its query engine.
+%
+
+%\textbf{Tables:} In DQL, a homogeneous representation of data is called a {\em table}. %Thus, a pattern directly maps to a table in SQL or a relation in Datalog. 
+%A DQL query generates new tables (similarly to creating views in SQL) or returns row IDs of a table (select query in SQL). 
+
+%\textbf{Schema:} A data store makes its data available by first publishing its schema in \dcl~(\dclfull), an example of which is given above in italics. 
+%This published schema, the structure of a set of initial tables in \dcl~, is called the {\em basis}. 
+%%For instance, a SQL database will expose certain tables (or a view of them) via initial patterns defined using PDL.
+%%DQL queries can combine PDL code from several data stores and present a combined view to the querier (who may not even be aware that each initial pattern maps to a table in a different database).
+
+%Using DQL, a programmer can define new tables from the initial ones (using a \texttt{def} query) and finally obtain the results of a desired table (using a \texttt{find} query).
+
+\section{The \dsl~Framework}
+\label{overview}
+
+
+%\subsection{Overview}
+%\textbf{Features.} The following are some key features of \dsl: %~that enable us to attain the above design goals.
+%\begin{enumerate}
+	%%\item {\em No access to Datalog relations:} \dsl~does not allow direct access to the underlying Datalog relations. Rather it encapsulates the relations into a \emph{pattern}. 
+	%%A pattern needs to be defined %(either via \dsl~code or via configuration) 
+	%%before it can be used. 
+	%\item {\em No predefined patterns:} \dsl~does not have any predefined patterns. Rather, it allows users to define their own initial patterns, called {\em the basis}.
+	%%For example, in the context of static analysis, 
+	%%a basic pattern could match all instructions inside a loop, while a complex pattern would match only JDBC calls in a loop (see Example~\ref{sql:loop} in Section~\ref{jdql:examples}). 
+	%\item {\em Extensible:} An advanced user has ability to change the basis
+	%if it is found that existing patterns are not able to capture the domain properly. 
+	%%\item {\em Validation:} \dsl~is type-safe and validates any hand-written rules 
+	%%to eliminate potential bugs (Section~\ref{validation}). 
+	%%\item {\em Type-safety:} \dsl~enforces type correctness. % and catches invalid types. 
+	%%So, for example, if a variable is of type \texttt{Int}, assigning any other type to it will cause an error. 
+	%%\item {\em RDBMS Emulation:} In \dsl, patterns are similar to RDBMS tables that are linked via {\em primary keys}. 
+	%%There are no foreign keys; a somewhat related notion of {\em pattern keys} is used. Furthermore, \dsl~syntax is closer to SQL  and  more friendlier than Datalog. 
+	%%\item {\em Filters:} Patterns can be filtered to return only a subset. 
+	%%A pattern returns the set of primary key(s) for its rows matching some search criteria. A search criteria is specified via \emph{filters}. The sets of keys returned from two patterns can be combined using the union (or), intersection (and), set difference (not) and Symmetric difference (xor) operations.
+	%%\item {\em Optimization:} \dsl~performs optimizations such as {\em rule-filtering} and {\em rule-rewriting} (Section~\ref{rule:rewriting}, \ref{rule:rewriting}). % and {\em magic sets}. %~\cite{Bancilhon:1985:MSO:6012.15399}. % used to avoid generating unnecessary facts. %The latter optimization is provided by the IRIS engine itself. 
+%\end{enumerate}
+
+%\textbf{Languages and Components.} 
+The \dsl~framework comprises two primary languages: 
+\begin{enumerate}
+	%\item \emph{Operational Component:} This is the primary component for end-users to query data. They will use their domain knowledge and write code in the {\bf \dsl~language} syntax, which is the main language of the framework. 
+	\item \emph{Query language:} This is the primary component, used for querying data with some user-specified criteria. This criteria is specified in what we call the \dsl~syntax.
+	Its code is given in \texttt{typeface} font, as in: 
+	\texttt{\bfseries def \#human as \#person}.
+	
+	\item \emph{Schema language:} 
+	The initial schema is specified via {\bf \dcl}~(\dclfull). %More specifically, it is used to define the basis patterns. % for the domain. 
+	%Its syntax is similar to Scala's function signatures. 
+	\dcl~code is given in \dclcode{italics}, as in: \dclcode{person(name:String, age:Int)}. %Details are given in Section~\ref{configuration}.
+	
+	%\item 
+  \end{enumerate}
+
+%\textbf{Domain-Specific Configuration:} The \dcl~and Datalog code together form the {{\em domain-specific configuration}} or simply {\em configuration}.
+%The configuration, whose details are given in Section~\ref{configuration}, will usuall be hidden from end-users and only edited by advanced users. % unless they are extending the framework. 
+
+\textbf{Terminology:} We use the following terminology:
+\begin{enumerate}
+	\item \textbf{Tables:} \dsl~operates on primitives called {\em tables}. Table names always start with `\texttt{\#}' (example \texttt{\#person}). Users define new tables by extending existing ones. 
+	%A pattern is analogous to a SQL table. 
+	%Internally 
+	%A able maps to a Datalog relation, or to a SQL table/view.
+	\item \textbf{Basis:} These are initial tables defined via \dcl. 
+	\item \textbf{Attributes:} A basis table has a name and one or more attributes. 
+	%Attributes are equivalent to the columns of a database table.
+	An attribute is a typed variable and starts with `\texttt{@}'. As an example, the \dcl~code: 
+\begin{enumerate}
+	\item[] \dclcode{person(name:String, age:Int, city:String)}
+\end{enumerate}
+defines a basis table \texttt{\#person} with three attributes: \texttt{@name}, \texttt{@city} (\texttt{String}s), and \texttt{@age} (\texttt{Int}). %\texttt{String} and \texttt{Int} are the only primitive types. 
+User-defined tables do not have attributes. % but they can access attributes of basis tables via {\em traversal}.
+
+\end{enumerate}
+\full{
+Figure~\ref{tab:\dsl} summarizes the various components. 
+\begin{figure}[!h]
+\centering
+  \begin{tabular}{ |c|c|c|c| }\hline
+ {\em Language~} & {\em Purpose}           & {\em User} & {\em Ref.}\\ \hline\hline
+  			\dsl     & Define new tables     & Data seeker       & \ref{description}\\ \hline
+	 		  \dcl     & Define initial tables & Data owner         & \ref{configuration}\\ \hline
+		 	  %Datalog  & Define initial rules    & Advanced         & \ref{datalogrules}\\ \hline
+  \end{tabular}
+\caption{\dsl~framework components}
+\label{tab:\dsl}
+\end{figure}
+}
+%
+%
+%\paragraph{Reusability:} \dsl~encourages reusability. Multiple boot configurations can be specified as long as there are no violations of the semantic rules (Section~\ref{semantic}) in the combined one. As an example, the following \dsl~code demonstrates reuse of both configuration and other \dsl~code:\\
+%\begin{small}
+%\texttt{\phantom{1}~~~~basis my\_basis1.txt, my\_basis2.txt~~~~// load multiple basis configs}\\
+%\texttt{\phantom{1}~~~~rules my\_rules1.txt, my\_rules2.txt~~~~// load multiple rules configs}\\
+%\texttt{\phantom{1}~~~~import my\_code1.\dsl, my\_code2.\dsl~~~~~// reuse \dsl~code from here}
+%\end{small}

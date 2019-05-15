@@ -1,0 +1,149 @@
+\subsection{Schema Definition}% via \dcl~and Datalog}
+\label{configuration}
+Recall that some initial patterns are mapped to the basis via configuration defined using \dcl~(\dclfull). Consider the earlier \dcl~example to define a basis pattern called \texttt{\#person}:\\ %(reproduced below) 
+%Consider the example of Section~\ref{terminology}:\\\\
+\phantom{.}~~~\dclcode{person(name:String, age:Int, city:String)~~~// \dcl~code}
+
+In reality, the above will give an error because in addition to attributes, each pattern must have either one or more {\em primary keys} or one or more {\em pattern keys}. %These are essentially attributes with special meaning. 
+
+\subsubsection{Primary Keys} 
+\label{primarykeys}
+%A primary key is equivalent to its counterpart in SQL - 
+
+Two patterns are linked via primary keys. Any attribute can be set as a primary key by appending an ID enclosed in square brackets to the attribute, as in the following \dcl: \\ %. Therefore the following is valid \dcl~code (won't give an error):\\
+{\dclcode{\phantom{~}~person(persID:String[pID], name:String, age:Int, city:String)}}
+
+The above defines a primary key with ID \texttt{pID}, written as \texttt{[pID]}. This ID is used to match primary keys of other patterns. 
+%(the identifier \texttt{persID} is never used).
+Now let us define two more patterns via \dcl: \\
+{ 
+%\small
+\dclcode{\phantom{~}~corp(corpID:String[cID], name:String, founder:String)}\\
+\dclcode{\phantom{~}~works(persID:String[pID], firmID:String[cID], empID:String)}
+}
+
+Here \texttt{\#corp} has one primary key \texttt{[cID]}, while \texttt{\#works} has two primary 
+ keys, \texttt{[cID]} and \texttt{[pID]}. The two patterns are connected via the common primary key \texttt{[cID]}, similar to the way RDBMS tables are connected. % via primary-foreign key relationships. 
+However, there are no foreign keys in \dsl~and all such relationships are {\em many-to-many}. 
+Primary keys have the following properties:
+\begin{enumerate}
+	\item Primary keys attributes cannot be used in a filter. They are used internally for traversal and merging. %ing patterns.
+	%\item patterns connected via primary keys have a {\em many-to-many} relationship. 
+	\item A pattern returns its primary keys (or pattern keys - see below). Therefore, \texttt{\#person} will return \texttt{[pID]}s. 
+	\item A new pattern inherits the (primary or pattern) keys of its parent pattern(s). Therefore, any pattern defined using \texttt{\#person} will also return \texttt{[pID]}s. 
+\end{enumerate}
+%\textbf{Example.} 
+%
+%Now let us define two more patterns via \dcl: \\
+%{ 
+%%\small
+%\dclcode{corp(corpID:String[cID], name:String, founder:String)}\\
+%\dclcode{works(persID:String[pID], firmID:String[cID], empID:String)}\\
+%}
+
+\textbf{Traversal:} Traversal occurs when a pattern is extended and the filter accesses an attribute of a different pattern. The patterns must be connected by a chain of primary keys for traversal to be successful (otherwise an error will be thrown). If such a path exists then \dsl~will automatically join the relations (i.e., pattens) in the path using the primary keys.
+As an example, the following pattern, \texttt{\#fromAcme} uses \texttt{\#corp} directly and \texttt{\#works} indirectly for traversal:\\ \colorbox{Light}{\small \texttt{def \#fromAcme as \bfseries{\#person where \{\#corp.@name='Acme'\}}}}.
+
+ Traversal from \texttt{\#person} to \texttt{\#corp} is done via \texttt{\#works} as follows:
+	{\small \texttt{\#person[pID] -> \#works[pID,cID] -> \#corp[cID]}}. 	
+	The traversal is explicitly seen in the compiled Datalog code:\\	
+	{\small \texttt{fromAcme(pID) :- person(pID, \_, \_, \_), works(pID, cID, \_),\\\phantom{1}~~~~~~~~~~~~~~~~corp(cID, 'Acme', \_).}}
+
+	 %\texttt{\#fromAcme}'s keys are derived from its parent pattern (\texttt{\#person}). Thus, \texttt{\#fromAcme} has the primary key \texttt{[pID]}. %This attribute is hidden from the end-user because it is a primary key. 
+	
+	
+	\subsubsection{Pattern keys} 
+	\label{patternkeys}
+	
+	Pattern keys define attributes that map to another pattern (see Example~\ref{patterkeyexample}, Section~\ref{description}).
+		%We cannot use a primary key for this, since the corresponding attribute is invisible. 
+		Pattern keys are defined by % by appending 
+	an ID enclosed in  braces. % to the attribute. 
+	The following %\dcl~code 
+	defines a pattern with two pattern keys both with ID \texttt{pID}:\\%, which we will write as \texttt{\{pID\}}:\\\\
+	 \dclcode{\phantom{1}~~parent(person:String\{pID\}, child:String\{pID\})}
+	
+	A pattern key has the following features: %is like a primary key with some differences:
+\begin{enumerate}
+	\item A pattern key attribute can be used in a filter. It can map to any pattern that returns a primary key with the same ID. In our example, both \texttt{@child} and \texttt{@person} attributes of \texttt{\#parent} can map to any pattern that returns \texttt{[pID]} (such as \texttt{\#fromAcme}). Therefore, we can, for example, write: \\
+	{\small \colorbox{Light}{\texttt{def \#AcmeParent as \#parent where \{@child = \#fromAcme\}}}}
+	%	because \texttt{\#fromAcme} outputs \texttt{[pID]}.
+	\item In a filter, a pattern returning a pattern key can be used in place of a pattern returning the same primary key. Therefore, in the code above the \texttt{@child} attribute can also take as input any pattern returning \texttt{\{pID\}}.
+	\item Pattern keys are non-traversable and cannot be merged with primary keys. Thus, a pattern returning \texttt{[pID]} cannot be merged with one returning \texttt{\{pID\}}. %The next version of \dsl~will allow such joins provided the patterns return a single key.
+
+\end{enumerate}
+
+\textbf{Hiding returned pattern keys.} A pattern returns all its pattern keys. For instance, \texttt{\#parent} as defined above will return the pattern keys \texttt{\{pID, pID\}}. %Therefore, the \texttt{\#dependent} pattern defined above also returns same pattern keys because it uses \texttt{\#parent} in its \texttt{<match>}. 
+Suppose, we want it to return only the first key (representing parents), we can skip the other key(s) by appending `\texttt{!}' to it, as in:\\
+\dclcode{\phantom{1}~~~parent(person:String\{pID\}, child:String\{pID!\})}
+%\phantom{1}~~~~~
+%making \texttt{\#parent} return only the first \texttt{\{pID\}}. 
+
+After this, \texttt{\#parent} will return only the first key \texttt{\{pID\}}, and  the following code, for example, will be valid \dsl:\\ %\\\\
+ \colorbox{Light}{\small \texttt{def \#grandParent as \bfseries{\#parent where \{@child = \#parent\}}}}
+
+%\subsubsection{Reduced basis}
+%\label{reducedbasis} 
+%Let us enumerate the basis patterns for the examples: \\
+%{\small
+%	\dclcode{\phantom{1}~~~person(persID:String[pID], name:String, age:Int, city:String)}\\
+%	\dclcode{\phantom{1}~~~works(persID:String[pID], firmID:String[cID], empID:String)}\\
+%	\dclcode{\phantom{1}~~~corp(corpID:String[cID], name:String, founder:String)}\\
+%	\dclcode{\phantom{1}~~~parent(person:String\{pID\}, child:String\{pID\})}
+%	}
+%	
+%The data for these patterns is supplied by the user. All such patterns form the  {\em reduced basis}.
+%
+%\subsubsection{Extended Basis}
+%\label{extendedbasis} 
+%Suppose we need to define patterns for siblings and ancestors. %, which cannot be done from \dsl. Therefore, 
+%Let us add them to the basis via \dcl:\\
+%{\small
+%\dclcode{\phantom{1}~~~sibling(left:String\{pID\}, right:String\{pID\})}\\
+%\dclcode{\phantom{1}~~~ancestor(ancestor:String\{pID\}, descendant:String\{pID\})}
+%}
+%
+%Their data can be inferred from the reduced basis and should not be user-supplied. These form the {\em extended basis}.
+%
+%\subsubsection{Initial Rules}
+%\label{datalogrules}
+%
+%Since the extended basis does not contain data, using it in \dsl~will return no results. 
+%Therefore, some rules need to be supplied to populate it using the reduced basis. These are the {\em initial rules}. 
+%
+%In the case of Datalog, our initial rules would be:\\
+%{\small
+%\texttt{\phantom{1}~~~sibling(x,y) :- parent(p,x),~parent(p,y),~x != y.}\\
+%\texttt{\phantom{1}~~~ancestor(x,y) :- parent(x,y).}\\
+%\texttt{\phantom{1}~~~ancestor(x,y) :- ancestor(x,a), ancestor(a,y).}
+%}
+%
+%In the case of SQL, our initial rules would map to views:\\
+%{\small
+%\texttt{\phantom{1}~~~sibling(x,y) :- parent(p,x),~parent(p,y),~x != y.}\\
+%\texttt{\phantom{1}~~~ancestor(x,y) :- parent(x,y).}\\
+%\texttt{\phantom{1}~~~ancestor(x,y) :- ancestor(x,a), ancestor(a,y).}
+%}
+%
+%Once the reduced basis, the extended basis and the initial rules are defined, the configuration is complete. The configuration is validated as described in Appendix~\ref{validation}.
+%
+%A basis pattern can be hidden using `!' as in:\\
+%\dclcode{works!(persID:String[pID],corpID:String[cID], empID:String)}
+%
+%Hidden basis patterns are used only for traversal.
+%After this \texttt{\#works} will cannot be used in queries but may be used internally for traversal.
+
+%\phantom{.}~~~\dclcode{person ! (name:String, age:Int, city:String)~~~// \dcl~code}
+
+
+% and \dsl~queries can be issued. 
+%Some additional configuration settings are given in Appendix~\ref{config}. 
+Once the pattern schema, the primary and pattern keys are defined in \dcl, the schema definition is complete. The set of initial patterns defined in the schema is called the {\em basis}. Advanced users can make additional tweaks to the basis configuration as described in Appendix~\ref{basis}.
+
+A \dsl~server will be initialized with a basis along with raw data for its patterns (supplied in CSV format). 
+After this, it can accept \dsl~queries and return data based on the result mapping supplied. The \dsl~and the basis must adhere to semantic restrictions given in Section~\ref{semantic}. 
+
+Since \dsl~is primarily a query language, it does not have queries to insert data and all external data must be provided in the initialize phase. However, every \texttt{def} query in \dsl~effictively creates a temporary pattern internally. 
+
+
+%Section~\ref{compilerlogic} describes the compiler. 

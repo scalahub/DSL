@@ -1,0 +1,117 @@
+%%\documentclass{letter}
+%\documentclass[conference]{IEEEtran}
+%\documentclass{sigplanconf}
+\documentclass{acm_proc_article-sp}
+%\documentclass{llncs}
+%\documentclass{sig-alternate}
+\usepackage{amsmath}
+
+\usepackage{rotating}
+\usepackage[obeyspaces]{url}
+\usepackage{multirow}
+\usepackage{amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[lighttt]{lmodern}
+\usepackage{color}
+\definecolor{Light}{gray}{.90}
+\definecolor{Faint}{gray}{.96}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue]{hyperref} % uncomment for pdf
+\newcommand{\dsl}{DQL}
+\newcommand{\dslfull}{\underline{D}ata \underline{Q}uery \underline{L}anguage}
+\newcommand{\dcl}{PDL}
+\newcommand{\dclfull}{\underline{P}attern \underline{D}efinition \underline{L}anguage}
+\newcommand{\tld}{\raise.17ex\hbox{$\scriptstyle\sim$}}
+\newcommand{\dclcode}[1]{\textsl{\textsf{#1}}}
+\newcommand{\ignore}[1]{} % may contain useful stuff (that needs more work)
+
+\newif\iffull
+\fulltrue % or
+%\fullfalse
+\newcommand{\full}[1]{
+\iffull
+  #1
+\else
+  % electronic
+\fi
+}
+
+\begin{document}
+%\title{Finding Bugs and Coding Anti-Patterns Using Datalog %\dsl 
+\title{Data Query Language: A DSL for Vetted Queries} 
+\author{DQL Developers}
+\maketitle
+\input{dsl/abstractWshop.tex}
+\input{dsl/introWshop.tex}
+\input{dsl/backgroundWshop.tex}
+\input{dsl/overviewWshop.tex}
+\input{dsl/descriptionWshop.tex}
+\input{dsl/configurationWshop.tex}
+%\input{dsl/semanticRestrictionsWshop.tex}
+\input{dsl/compilerWshop.tex}
+\input{dsl/analysisWshop.tex}
+\input{dsl/conclusionWshop.tex}
+%\bibliographystyle{abbrvnat}
+\bibliographystyle{unsrt}
+\bibliography{dsl/DSLbib}
+
+\appendix
+
+\section{Overview of Datalog}
+\label{datalog-intro}
+\label{Datalog} 
+Datalog is a declarative programming language 
+used for querying deductive databases.
+%~\cite{Ramakrishnan93asurvey} 
+It has found applications in information extraction, program analysis and security in recent years~\cite{Huang:2011:DEA:1989323.1989456,datalog,Ramakrishnan93asurvey}.
+%cite{datalog}
+%Unlike SQL, Datalog queries express the WHAT rather than the HOW. 
+In Datalog, table schemas -- for example, \texttt{\small Parent(A, B)} -- are called as {\em Relations} and the corresponding table rows -- for example, \texttt{\small Parent('Homer', 'Bart')} -- are called {\em Facts}. 
+New tables are constructed via {\em Rules}. Rules are made of two parts separated by the \texttt{:-} symbol: (1) One {\em Head relation} on the left, and (2) One or more {\em Tail relations} on the right each separated by the \texttt{,} symbol. For example:\\
+		{\small\phantom{.}~~\texttt{GrandParent(A, C) :- Parent(A, B), Parent(B, C)} }
+	% \item Two head relations are identical if they have the same name and number of columns.
+	
+	Datalog supports recursive rules such as: \\
+		{\small\phantom{.}~~\texttt{Ancestor(A, C) :- Ancestor(A, B), Ancestor(B, C)}}
+	
+	Tail relations in the same rule are combined using conjunction. Two or more rules with the same head relation -- for example below -- are combined using disjunction:\\
+{\small\phantom{.}~~\texttt{Ancestor(A, B) :- Parent(A, B)}\\
+\phantom{.}~~\texttt{Ancestor(A, C) :- Ancestor(A, B), Ancestor(B, C)}}
+	
+\textbf{Comparison with Relational Algebra.} Although Datalog has similarities to SQL/relational algebra, they are different. 
+Any expression in basic relational algebra can be expressed in Datalog. Operations in extended relational algebra (grouping, aggregation, sorting) are not supported in Datalog. Datalog can express recursion, which SQL cannot.
+
+\input{dsl/grammarWshop.tex}
+%\input{dsl/additionalconfigWshop.tex}
+%\input{dsl/semanticRestrictionsWshop.tex}
+\input{dsl/ruleValidationWshop.tex}
+%\input{dsl/compilationLogicWshop.tex}
+%\input{dsl/javabasis.tex}
+%\input{dsl/quickstart}
+%\acks
+\input{dsl/semanticRestrictionsWshop.tex}
+%We would like to acknowledge Aritra Dhar for his work on the Soot framework.
+\section{Mapping Grammar in ANTLR}
+\label{grammar}
+
+The following is the mapping grammar in ANTLR3. 
+\begin{small}
+	\begin{verbatim}
+	mappings:    'mappings' ID  (mapping)+ EOF;
+	mapping:     'map' MAP 'as' keyMaps ';';
+	MAP:         ':' ID;
+	keyMaps:     keyMap | (keyMap ',' keyMaps);
+	keyMap:      KEY^ '=>' value;
+	value:       COUNT | pattern;
+	pattern:     PATTERN ('.' countOrAttr (',' countOrAttr)*)?;
+	countOrAttr: COUNT | attribute;
+	attribute:   ATTR^ ('.' countOrAggr)?;
+	countOrAggr: COUNT | AGGR;
+	PATTERN:     '#' ID;
+	KEY:         '$' ID;
+	ATTR:        '@' ID;
+	AGGR:        'max'|'min'|'sum'|'avg';	
+	COUNT:       'count';	
+	\end{verbatim}
+\end{small}
+
+\end{document}

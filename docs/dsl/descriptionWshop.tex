@@ -1,0 +1,92 @@
+\subsection{\dsl~Syntax}
+\label{description}
+
+\dsl~is the main language of the framework and allows users to do two things: (1) define new patterns by extending one or more existing patterns and (2) find rows in patterns. Here we explain both. 
+%We use the configuration of Section~\ref{configuration} for the examples here.
+\full{See Appendix~\ref{grammar} for the \dsl~grammar.}
+
+\textbf{Defining Patterns:}
+\label{def}
+	A new pattern is defined as \\
+\texttt{\phantom{1}~~~~~~~~~~~\small \underline{def <newPattern> as <match>}}\\
+	Here \texttt{<match>} is a combination of one or more patterns and optional filters. We illustrate this via examples below. To improve readability in this section, \dsl~code will be in \colorbox{Light}{\small \texttt{gray}} and %In the following, 
+	the \texttt{<match>} expression will be in \colorbox{Light}{\small \texttt{\bfseries{bold}}}. The patterns inside \texttt{<match>} are called the parents of \texttt{<newPattern>}. 
+	
+\begin{enumerate}
+	\item \textbf{Filter:} A filter extracts a subset of a pattern. For instance: 	
+\colorbox{Light}{\small \texttt{def \#adult as \bfseries{\#person where \{@age > 18\}}}}
+
+A filter is a tuple ({\em attribute}, {\em operator}, {\em value}) (in this case (\texttt{@age}, \texttt{>}, \texttt{18})), specified using \texttt{where} keyword. % and enclosed in braces.\\
+The \tld~ and \tld\tld~ operators represent wildcard and regex respectively, for use with \texttt{String}s.
+
+	\item \textbf{Merging filters:} Multiple filters can be used, as in:\\
+\texttt{\colorbox{Light}{\small def \#member as \bfseries{\#person where \{@age > 25 or }}} \\
+\phantom{.}~~~~~~\texttt{\small \colorbox{Light}{\bfseries{(@city = 'Springfield' and @age > 20)\}}}}\\
+	%where multiple filters are applied to \texttt{\#person}. 
+	Filters are merged via \texttt{\bf and}/\texttt{\bf or} using parenthesis. 
+	
+	\item \textbf{Traversing patterns:} User-defined patterns do not have attributes. However, attributes of any basis pattern can be accessed using  \texttt{.} operator:
+	
+	\texttt{\small \colorbox{Light}{def \#elder as \bfseries{\#member where \{\#person.@age > 30\}}}}
+	
+	This is called traversal --  we `traverse' from \texttt{\#member} to \texttt{\#person} and access \texttt{@age}. %Traversing rules are given in Section~\ref{semantic}.
+	
+	%Note that some patterns are non-traversable (see Section~\ref{semantic}).\\
+	
+	\item \label{patterkeyexample}\label{pattern_as_value}\textbf{Patterns as values:} Some attributes can map to a pattern. Example, \texttt{@child} takes value \texttt{\#adult} in:
+	
+	\texttt{\small \colorbox{Light}{def \#senior as \bfseries{\#parent where \{@child = \#adult\}}}}
+	
+	The rules for this are described in section~\ref{patternkeys}.
+	
+	\item \label{end}\label{attribute_as_value}\textbf{Attributes as values:} Any attribute	can map to another attribute of the same type, as in: 
+	
+	\texttt{\colorbox{Light}{\small def \#MD as \bfseries{\#person where \{@name = \#corp.@founder\}}}}
+%	where the attribute \texttt{@name} of \texttt{\#person} takes as value the attribute \texttt{@founder} of \texttt{\#corp}.
+
+	\item \label{multi} \textbf{Merging patterns:} \texttt{<match>} can have multiple patterns merged via \texttt{\bf and},  \texttt{\bf or}, \texttt{\bf not} or \texttt{\bf xor} (denoting respectively, intersection, union, set difference and symmetric difference operations), as in: 
+	\texttt{\colorbox{Light}{\small def \#eligible as }}\\
+	\texttt{\colorbox{Light}{\small \bfseries{\{\#person where \{@age>20\} and \{\#member or \#MD\}\}}}}
+	%\texttt{\phantom{.}~~~~~~~~~~~~~~~\colorbox{Light}{\bfseries{and \{\#member or \#director\}\}}}}.
+	
+	%where  the patterns \texttt{\#person} and \texttt{\#member} are joined using \textbf{and}. 
+		Merged patterns must be enclosed in  braces. 
+\end{enumerate}
+
+%correctness guarantee. Always generates Safe datalog rules (that always terminate),
+
+
+%Table~\ref{tab:operators} summarizes the various allowed operators in filters.
+%\begin{table} [htbp]
+	%\centering
+		%\small
+		%\texttt{\begin{tabular}{|c|c|c|c|}
+		%\hline
+%{\bf Operator}&{\bf Allowed Types}&{\bf Allowed Values}&{\bf Meaning}\\\hline\hline
+%=, !=&Int, String, Pattern&value or attribute&usual meaning\\\hline
+%\tld, \tld\tld&String&String&wildcards, regex\\\hline
+%>, <, <=, >=&Int&value or attribute&usual meaning\\\hline
+%\end{tabular}}
+	%\caption{Allowed operators in filters}
+	%\label{tab:operators}
+%\end{table}	
+
+\textbf{Finding Patterns:}
+Results are returned using a \texttt{find} statement, the syntax of which is:
+%\begin{enumerate}
+%	\item[] 
+\texttt{\textbf{find <match>}},
+%\end{enumerate}
+	where \texttt{<match>} is any single-pattern expression. %used in defining a pattern (see Section~\ref{def}, \ref{start}-\ref{end}). 
+	For instance: \\
+	\colorbox{Light}{\small \texttt{find \bfseries{\#eligible where \{\#person.@age < 50\}}}}.	
+	
+%Note that to improve readability, \texttt{find} does not directly accept multi-pattern \texttt{<match>} expressions (i.e., those joined via \texttt{and}, \texttt{or}, etc, as in Section~\ref{def}, \ref{multi}). To use such expressions, first define a new pattern using the expression and then use this new pattern in the \texttt{find} statement as we did above.
+
+%\paragraph{Configuring \dsl~for a Domain:} \dsl~is not dependent on a domain. In order to use \dsl, it must be bootstrapped using an initial domain-specific configuration, which is done by an advanced user. Section~\ref{configuration} gives details of this configuration. Section~\ref{semantic} gives the semantic restrictions in \dsl~based on the configration. The configuration is validated to eliminate any bugs as described in Section~\ref{validation}.
+%
+%
+\full{
+The \dsl~compiler %(see Section~\ref{compilerlogic}) 
+takes in a sequence of \texttt{def} and \texttt{find} statements along with schema definitions and code such as SQL or Datalog for some underlying database.
+}

@@ -1,0 +1,59 @@
+%
+%\section{Configuration Validation}
+%\label{validation}
+%%\paragraph{Initial Rule Validation.} 
+%The domain-specific configuration comprises three things: (1) Reduced basis, (2) Extended basis, and (3) Datalog rules to populate (2) from (1). 
+%%the extended basis from the reduced basis. 
+%%Errors can creep in at any of these. 
+%Each is prone to errors. 
+%For instance, subtle bugs can arise to typos in hand-written Datalog rules. 
+%%Some of these are difficult to debug because the Datalog engine does not catch them. 
+%%We found that a majority of the time is spent in debugging such errors. 
+%\dsl~validates the Datalog rules against the basis to eliminate several errors described below: 
+%%not caught by the Datalog engine.
+%%\footnote{One error that Datalog does catch is {\em unlimited variables} (resulting in {\em unsafe rules}~\cite{revesz1990closed}). As an example, the rule \texttt{Ancestor(x, y) :- Person(x).} is unsafe because of the unlimited variable \texttt{y} (it does not appear on the right side).} 
+%%The errors caught are given below:
+%\begin{enumerate}
+	%\item \emph{Reduced basis with rules:} There should not exist rules with head relations from the reduced basis. Reduced basis should be populated only via user input. 
+%
+	%\item \emph{Extended basis without rules:} Every pattern in the extended basis must have at least one rule where it is the head relation. Otherwise, such patterns will not be populated. This can occur due to typos in the Datalog rules. As an example, refer to the initial rules of Section~\ref{datalogrules}.  If the first rule is mistyped as\\
+	%{\small \texttt{\colorbox{Faint}{siblng}(x,y) :- parent(p,x), parent(p,y), x!=y.}}\\
+%Then the \texttt{\#sibling} pattern will not be populated.	
+%
+	%\item \emph{Undefined tail relation:} Every tail relation must either refer to a pattern in reduced basis or to another head relation. Otherwise, any rule that uses the relation will return no data. As an example, consider the earlier rule, but now mistyped as\\
+	%{\small \texttt{sibling(x,y) :- parent(p,x),\colorbox{Faint}{parnt}(p,y), x!=y.}}
+	%
+%Then the \texttt{\#sibling} pattern will not be populated.	
+	%
+  %\item \emph{Cyclic definitions:} For every relation, there must be at least one rule where it is a head relation and not the tail relation. Otherwise such relations will not contain data. As an example, refer to Section~\ref{datalogrules}. Suppose the second rule is mistyped as\\
+	%\texttt{\small \colorbox{Faint}{ancestr}(x,y) :- parent(x,y).}\\
+	%Then only the third rule, given below, is used:\\ % for \texttt{\#ancestor}.\\\\
+%{\small \texttt{ancestor(x,y) :- ancestor(x,a), ancestor(a,y).}}\\
+%This will have no data because the relation is cyclic. 
+%
+ %%(i.e., defined using only itself). This can also occur %(and will be caught) 
+%%if the mistyped rule is absent altogether. %The compiler checks for cycles only within a single rule, and not across multiple rules. 
+  %\item \emph{Unused head relations:} Every head relation must map to either a pattern in the extended basis or to a tail relation of another rule. A typo (such as the example in Section~\ref{limitations}, where the \texttt{Parent} relation is never used) can cause this to be violated. 
+	%%This will also catch cyclic error in the previous example due to the mistyped rule but not due to the absence of the rule. 
+  %\item \emph{Mismatch in basis:} The number and types of parameters in the rules must match the basis. Consider the first rule of Section~\ref{datalogrules} mistyped as:\\
+		%{\small 
+		%\texttt{sibling(x,y) :- parent(p,x), parent(p,y), x\colorbox{Faint}{>}y.}\\
+		%}
+%(use of `\texttt{>}' instead of `\texttt{!=}'). This causes \texttt{x, y} to be wrongly inferred as integers, causing incorrect data. 
+%
+%%Not only the types but also the number of parameters are checked, so the following error will also be caught:\\
+%%{\small \texttt{sibling\colorbox{Faint}{(x)} :- parent(p,x), parent(p,y), x != y.}}
+%
+%\item \emph{Mismatch in rules:} 
+%%The above finds mismatched parameters for relations in the basis. However, 
+%There may be intermediate relations not in the basis. % of other relations in the basis. 
+%For example, \texttt{secondCousin} in the extended basis 
+%could be defined using an intermediate relation \texttt{grandParents} not in the basis. This check finds mismatched parameters in intermediate relations.
+%
+%\item \emph{Incorrect wildcard usage:} \label{wildcard}\dsl~considers any variables starting with the text `\texttt{ANY}' as wildcards and will throw an error if such variables are repeated in a rule. 
+%\end{enumerate}
+%
+%% by ensuring that a head rule indeed exists either in the reduced basis or in the initial rules corresponding to every tail rule. This checking is performed over parameter types and number. It additionally validates that for every pattern in the extended basis, there is at least one rule with that pattern as the head relation. %If all checks pass, it proceeds to compilation. 
+%
+%
+%%\paragraph

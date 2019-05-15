@@ -1,0 +1,7 @@
+\begin{abstract}
+
+One of the main goals of OPAL (Open Algorithms) project is to enable seamless data sharing between arbitrary entities, while at the same time ensuring that query results do not leak sensitive information. For instance, if an identity provider queries a data store, it should be able to obtain results that allow it to create assertions about an identity (such as {\em id A belongs to group G}) and nothing else. In particular, it should not be able to obtain personally identifying information about the individual.
+OPAL attempts to do this by restricting the type of allowed database queries. Additionally, OPAL aims to bring together heterogeneous data stores, each with its own query languages. There are several dialects even with SQL. Due to this diversity, defining a common framework for privacy preserving data sharing seems difficult because a query auditor will have to understand several syntax and semantics. To address this, OPAL defines its own query language called DQL (Data Query Language) which is data-store agnostic. 
+Similarly to SQL, DQL can be used to represent arbitrary relationships between data, create more views of the data and finally query those views. DQL is expressive, yet compact and can capture SQL queries spanning several lines in a single statement. Another goal of DQL is to allow us to prove certain assertions about information leakage. 
+
+\end{abstract}
