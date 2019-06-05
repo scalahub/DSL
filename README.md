@@ -1,4 +1,5 @@
 # DQL
+[![Build Status](https://travis-ci.org/scalahub/DQL.svg?branch=master)](https://travis-ci.org/scalahub/DQL)
 
 DQL is a Domain Specific Language for querying a database of facts (also called a table). Internally, it uses Datalog as its query engine, and is short for Data(log) Query Language.
 	
