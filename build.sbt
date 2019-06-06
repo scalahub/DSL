@@ -2,20 +2,16 @@ name := "DQL"
 
 version := "0.1"
 
-//scalaVersion := "2.11.8"
 scalaVersion := "2.12.8"
 
 lazy val BeanShell = RootProject(uri("https://github.com/scalahub/BeanShell.git"))
-//lazy val BeanShell = RootProject(uri("../BeanShell"))
-
 lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
-
-// To refer to a local repository
-//lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
-
-// Sub-projects can be accessed as follows:
-// From https://stackoverflow.com/a/38917522/243233
 //lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
+// Sub-projects can be accessed as above: From https://stackoverflow.com/a/38917522/243233
+// use below for local repo
+
+//lazy val BeanShell = RootProject(uri("../BeanShell"))
+//lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
 //lazy val IrisParser = ProjectRef(uri("../iris-reasoner"), "parser")
 
 lazy val TrapCommon = (project in file("TrapCommon")).settings(
@@ -42,9 +38,9 @@ lazy val DatalogSolver = (project in file("DatalogSolver")).settings(
   libraryDependencies += "commons-io" % "commons-io" % "2.6 "
 ).dependsOn(
   XDSLLoader, 
-  TrapCommon,
   //IrisParser,
-  IrisReasoner
+  IrisReasoner,
+  TrapCommon
 )
 
 
@@ -83,6 +79,10 @@ lazy val root = (project in file(".")).settings(
 ).dependsOn(
   DQLDemo
 )
+
+mainClass in (Compile, run) := Some("dql.DQLConsole")
+
+/*
 // https://github.com/sbt/sbt-assembly
 Project.inConfig(Test)(baseAssemblySettings)
 assemblyMergeStrategy in assembly := {
@@ -96,5 +96,5 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+*/
 
-mainClass in (Compile, run) := Some("dql.DQLConsole")
