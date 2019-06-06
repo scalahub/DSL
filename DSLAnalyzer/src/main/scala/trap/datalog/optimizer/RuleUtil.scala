@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package trap.datalog.optimizer
+
+import scala.collection.JavaConverters._
 
 object RuleUtil {
   def getName(s:String) = {
@@ -16,7 +12,7 @@ object RuleUtil {
         foo(?x, ?y) :- foo(?y, ?z), bar(?z, ?x), ?x = 'foo'. // some dummy rule
      */
     // first clean ruleString (remove spaces, tabs, blank lines)
-    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.filter(_ != "")
+    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.iterator().asScala.filter(_ != "")
     // now filter comments out and get rules as each list[String]
     val rules = cleanedString.filterNot(_.startsWith("//")).foldLeft("")(
       (x, y) => x + y

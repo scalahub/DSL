@@ -5,9 +5,11 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
 import java.io.BufferedInputStream
-import javax.swing.JFrame
+
+import javax.swing.{JFrame, WindowConstants}
 import util.StringUtil
 import java.awt.Color
+
 import bsh.util.JConsole
 
 import scala.collection.JavaConversions._
@@ -52,9 +54,7 @@ class REPLConsole(replCode:REPLCode, maxInputSize:Int, exitKeywords:Seq[String],
   //define a frame and add a console to it
   val frame = new JFrame(consoleTitle);
   val console = new JConsole();
-//  console.set
   def getHistory:Seq[String] = console.getHistory.map(_.asInstanceOf[String]).toSeq
-//  frame.add
   val bufInput = new BufferedInputStream(console.getInputStream())
   def addHistory(seq:Seq[String]) = seq foreach console.addHistory
   def readInput = {
@@ -65,11 +65,11 @@ class REPLConsole(replCode:REPLCode, maxInputSize:Int, exitKeywords:Seq[String],
   }
   val newline = System.getProperty("line.separator");
   def prompt = if (console != null) {
-//    console.setFont(new Font("Consolas", Font.BOLD, 20))
+    //    console.setFont(new Font("Consolas", Font.BOLD, 20))
     console.print("\nDQL> ", Color.BLUE)
-//    console.print(" ") 
-//    val f = new Font("Monospaced", Font.BOLD, 20)
-//    console.setFont(new Font("Monospaced", Font.BOLD, 20))
+    //    console.print(" ")
+    //    val f = new Font("Monospaced", Font.BOLD, 20)
+    //    console.setFont(new Font("Monospaced", Font.BOLD, 20))
     console.setForeground(Color.BLACK)
   };
   // def prompt = if (console != null) console.print("\nDQL> ", Color.BLUE);
@@ -92,7 +92,8 @@ class REPLConsole(replCode:REPLCode, maxInputSize:Int, exitKeywords:Seq[String],
     // console.setSize(dim)
   
     frame.getContentPane().add(console);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(dim);
     frame.setVisible(true);
     

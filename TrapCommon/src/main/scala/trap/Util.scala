@@ -10,11 +10,11 @@ import java.io.PrintWriter
 
 
 object Util {
-  val encoder = new sun.misc.BASE64Encoder
+  val encoder = java.util.Base64.getEncoder
   val d = java.security.MessageDigest.getInstance("SHA-256");
   
   def getHash(words:String*) = 
-    encoder.encode(d.digest(words.foldLeft("")((x, y)=>x+"|"+y).getBytes)).replaceAll("[^\\p{L}\\p{Nd}]", "").substring(0, 10)
+    encoder.encodeToString(d.digest(words.foldLeft("")((x, y)=>x+"|"+y).getBytes)).replaceAll("[^\\p{L}\\p{Nd}]", "").substring(0, 10)
 
   object NullOutputStream extends OutputStream {@Override def write(b:Int) {} }
   class StringOutputStream(s:StringBuffer) extends OutputStream {    

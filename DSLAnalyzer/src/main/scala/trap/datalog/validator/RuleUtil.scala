@@ -5,7 +5,9 @@
  */
 
 package trap.datalog.validator
+
 import trap.dsl.FactDataStructures._
+import scala.collection.JavaConverters._
 
 abstract class IRISType
 case class IRISAny(name:String) extends IRISType {override def toString = "Any"}
@@ -131,7 +133,7 @@ object RuleUtil {
        returns Array of each rule string along with a zipped version of string and corresponding parsed rule
      */
     // first clean ruleString (remove spaces, tabs, blank lines)
-    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.filter(_ != "")
+    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.iterator().asScala.filter(_ != "")
     // now filter comments out and get rules as each list[String]
     val rules = cleanedString.filter(!_.startsWith("//")).toList
     rules foreach (rule => if (rule.contains("//")) throw RuleParsingException("Comment must be on its own line: "+rule, rule))
