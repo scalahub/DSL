@@ -50,9 +50,11 @@ DQL compiler is written in Scala using ANTLR3 and works as follows:
 
 To build DQL yourself (in Linux), clone the repo and install:
 
-	1. JDK 8+
+	1. JDK 9+
 	3. SBT
-	
+
+**Important** JDK <= 8 is no longer supported.  
+
 Then change to the directory DQL and give the command:
 	
 	sbt package
