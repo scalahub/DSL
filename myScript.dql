@@ -1,0 +1,16 @@
+load basis users.basis // load the basis from the file
+basis // show the basis
+
+// The file `users.csv` contains sample data above table. Ensure that this file exists.
+!cat users.csv // ! executes a shell command. In this case, it displays users.csv
+load #Users users.csv  // Load the table using the console command:
+
+map :userName as $userID => #Users.@firstName; // Define a mapping called ':userName'
+// Each mapping name must be prefixed by ':'. This peculiar syntax makes the parser simpler
+
+// Issue 'find' queries and test responses
+find #Users //  without any result mapping 
+find #Users:userName //  with mapping userName
+find #Users:userName where {@firstName ~ 'A*'} //  with mapping userName and filter
+
+

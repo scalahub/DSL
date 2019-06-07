@@ -1,0 +1,5 @@
+reduced Users(userID:String[userID], firstName:String, lastName:String, time:Int, balance:Int, salary:Int)
+load #Users users.csv  
+map :a as $userID => #Users;
+find #Users
+find #Users:a

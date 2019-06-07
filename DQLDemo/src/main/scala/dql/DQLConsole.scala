@@ -8,11 +8,16 @@ import scala.collection.JavaConverters._
 object DQLConsole {
   implicit def strToSeqStr(s:String) = List(s)
   
-  def dqlReplCode(input:String):Seq[String] = {
+  def dqlReplCode(inputWithInlineComments:String):Seq[String] = {
     try {
-      if (input.substring(0, 1) == "!") {
-        val code = input.trim.substring(1)
-        runCommand(code)
+      // added 01 Jan 2019
+      //  allow inline comments using //
+      //  example run abc // run the file abc
+      val input = inputWithInlineComments.split("//", 2)(0).trim
+      if (input.startsWith("!")) {
+      //if (input.substring(0, 1) == "!") {
+        val code = input.trim.substring(1).trim
+        "" +: runCommand(code)
       } else {
         if (input.startsWith("//")) Nil else {
           val array1 = input.trim.split(" ", 2) // split input using spaces
@@ -20,10 +25,10 @@ object DQLConsole {
           array1.length match {
             case 1 => // one command
               command match {
-                case ";" => Nil
+                case ";"|"" => Nil
                 case "help" | "?" =>
                   Seq(
-                    "DQL Console. Author: Amitabh Saxena (c) Accenture",
+                    "DQL Console",
                     "------------General commands ---------",
                     "help or ?                 : show this screen",
                     "exit or q                 : exit the REPL",
@@ -58,7 +63,7 @@ object DQLConsole {
                 case "defs" => DQLUtil.getDefs     
                 case "facts" => DQLUtil.getFactFiles     
                 case "reset" => DQLUtil.reset
-                case any => throw new Exception(s"Invalid command $any")
+                case any => throw new Exception(s"Invalid command [$any]")
               }
             case 2 => // two commands        
               val remaining = array1(1)        
@@ -66,7 +71,7 @@ object DQLConsole {
                 case "run" => 
                   val commands = trap.file.Util.readTextFileToString(remaining).lines.iterator().asScala.map(_.trim).filterNot(_ == "")
                   commands.flatMap{command =>
-                    Seq("-------", command) ++ dqlReplCode(command)
+                    Seq("-------", "[RUN] "+command) ++ dqlReplCode(command)
                   }.toSeq
                 case "load" => 
                   val array2 = remaining.trim.split(" ", 2) 
