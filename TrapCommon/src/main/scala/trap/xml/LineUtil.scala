@@ -1,4 +1,8 @@
+package trap.xml
+
 import org.xml.sax.{helpers, Locator, SAXParseException}
+
+@deprecated("Unused as of now. To remove", "09 June 2019")
 trait WithLocationAlt extends helpers.DefaultHandler {
     var locator: org.xml.sax.Locator = _
     def printLocation(msg: String) {
@@ -38,6 +42,8 @@ trait WithLocationAlt extends helpers.DefaultHandler {
 import org.xml.sax.Locator
 import scala.xml._
 import parsing.NoBindingFactoryAdapter
+
+@deprecated("Unused as of now. To remove", "09 June 2019")
 trait WithLocation extends NoBindingFactoryAdapter {
     var locator: org.xml.sax.Locator = _
 
