@@ -12,6 +12,37 @@ A DQL query consists of either `def` or `find` statements. A few example of DQL 
 
 The complete grammar of DQL is given [here](https://github.com/scalahub/DQL/blob/master/DSLToXDSL/src/main/scala/DSL.g "here").
 
+# DQL Implementation
+DQL compiler is written in Scala using ANTLR3 and works as follows:
+
+1. First it converts DQL to an intermediate representation called XDSL (the X stands for XML)
+2. XDSL is validated against the initial domain specific configuration. 
+3. XDSL is converted to Datalog to be used by a Datalog engine.
+
+# Projects related to DQL
+
+The following projects are related to DQL:
+
+1. DSLToXDSL:  converts DQL to XDSL 
+2. XDSLLoader: loads XDSL into memory
+3. XDSLToDatalog: converts loaded XDSL to Datalog
+4. DatalogSolver: process a Datalog query
+5. DQLAnalyzer: connects the above projects together
+6. DQLDemo: full demo of DQL query engine
+
+# Building DQL
+
+To build DQL yourself (in Linux), clone the repo and install:
+
+	1. JDK 11+
+	3. SBT
+
+**Important**: JDK below 11 are no longer supported.  
+
+Then change to the directory DQL and give the command:
+	
+	sbt package
+
 # Mapping 
 
  By default, a find query returns rowIDs of the matching rows. 
@@ -40,25 +71,6 @@ The query would return something like:
     temp2(16, 'OrderLoader.java', '<>', 19, 'OrderProcess.java').
 	
 The complete grammar of Mapping is given [here](https://github.com/scalahub/DQL/blob/master/DSLToXDSL/src/main/scala/Mapping.g "here").
-# DQL Implementation
-DQL compiler is written in Scala using ANTLR3 and works as follows:
-
-1. First it converts DQL to an intermediate representation called XDSL (the X stands for XML)
-2. XDSL is validated against the initial domain specific configuration. 
-3. XDSL is converted to Datalog to be used by a Datalog engine.
-
-# Building DQL
-
-To build DQL yourself (in Linux), clone the repo and install:
-
-	1. JDK 11+
-	3. SBT
-
-**Important**: JDK below 11 are no longer supported.  
-
-Then change to the directory DQL and give the command:
-	
-	sbt package
 
 # DQL Demo
 
@@ -158,14 +170,3 @@ DQL>
 The script `myScript2.dql` contains some more examples, such as how to define the basis using the console.
 
 For more information and syntax of DQL, see the documentation at this [link](http://github.com/scalahub/DQL/blob/master/docs/dsl.pdf "link").
-
-# Projects related to DQL
-
-The following projects are related to DQL:
-
-1. DSLToXDSL:  converts DQL to XDSL 
-2. XDSLLoader: loads XDSL into memory
-3. XDSLToDatalog: converts loaded XDSL to Datalog
-4. DatalogSolver: process a Datalog query
-5. DQLAnalyzer: connects the above projects together
-6. DQLDemo: full demo of DQL query engine
