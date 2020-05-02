@@ -34,10 +34,10 @@ The following projects are related to DQL:
 
 To build DQL yourself (in Linux), clone the repo and install:
 
-	1. JDK 11+
+	1. JDK 8 only
 	3. SBT
 
-**Important**: JDK below 11 are no longer supported.  
+**Important**: JDK 11 is currently not supported.  
 
 Then change to the directory DQL and give the command:
 	
