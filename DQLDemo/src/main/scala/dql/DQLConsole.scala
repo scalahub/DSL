@@ -69,7 +69,7 @@ object DQLConsole {
               val remaining = array1(1)        
               command match {
                 case "run" => 
-                  val commands = trap.file.Util.readTextFileToString(remaining).lines.iterator().asScala.map(_.trim).filterNot(_ == "")
+                  val commands = trap.file.Util.readTextFileToString(remaining).lines.map(_.trim).filterNot(_ == "")
                   commands.flatMap{command =>
                     Seq("-------", "[RUN] "+command) ++ dqlReplCode(command)
                   }.toSeq
@@ -121,7 +121,7 @@ object DQLConsole {
   private def runCommand(str:String) = {
     val (code, out, err) = Util.runCommand(str.split(' '))
     if (code == 0){
-      out.lines.iterator().asScala.toSeq
+      out.lines.toSeq
     } else throw new Exception(err)
     
   }

@@ -1,7 +1,5 @@
 package trap.datalog.optimizer
 
-import scala.collection.JavaConverters._
-
 object RuleUtil {
   def getName(s:String) = {
     val x = s.split('(')(0) 
@@ -12,7 +10,7 @@ object RuleUtil {
         foo(?x, ?y) :- foo(?y, ?z), bar(?z, ?x), ?x = 'foo'. // some dummy rule
      */
     // first clean ruleString (remove spaces, tabs, blank lines)
-    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.iterator().asScala.filter(_ != "")
+    val cleanedString = ruleString.replace(" ", "").replace("\t", "").lines.filter(_ != "")
     // now filter comments out and get rules as each list[String]
     val rules = cleanedString.filterNot(_.startsWith("//")).foldLeft("")(
       (x, y) => x + y

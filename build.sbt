@@ -6,17 +6,13 @@ scalaVersion := "2.12.8"
 
 lazy val BeanShell = RootProject(uri("https://github.com/scalahub/BeanShell.git"))
 lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
-
-//lazy val BeanShell = RootProject(uri("../BeanShell"))
-//lazy val IrisReasoner = RootProject(uri("../iris-reasoner"))
-
 //lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
-//lazy val IrisParser = ProjectRef(uri("../iris-reasoner"), "parser")
 
 lazy val TrapCommon = (project in file("TrapCommon")).settings(
   libraryDependencies += "commons-codec" % "commons-codec" % "1.12",
   libraryDependencies += "commons-io" % "commons-io" % "2.6",
-  libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
+  libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+  libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.4"
 ).dependsOn(BeanShell)
 
 lazy val DSLToXDSL = (project in file("DSLToXDSL")).settings(

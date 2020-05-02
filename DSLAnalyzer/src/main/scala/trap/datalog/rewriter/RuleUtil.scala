@@ -22,7 +22,7 @@ class RuleUtil(rulesString:String) {
         foo(?x, ?y) :- foo(?y, ?z), bar(?z, ?x), ?x = 'foo'. // some dummy rule
      */
     // first clean ruleString (remove spaces, tabs, blank lines)
-    val cleanedString = subst(rulesString.replace(" ", "").replace("\t", "")).lines.iterator().asScala.map(_.trim).filterNot(_.isEmpty).toArray
+    val cleanedString = subst(rulesString.replace(" ", "").replace("\t", "")).lines.map(_.trim).filterNot(_.isEmpty).toArray
     // now filter comments out and get rules as each list[String]
     val rules = cleanedString.filterNot(_.startsWith("//")).foldLeft("")(
       (x, y) => x + y
