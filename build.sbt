@@ -2,8 +2,6 @@ name := "DQL"
 
 version := "0.1"
 
-scalaVersion := "2.12.8"
-
 lazy val BeanShell = RootProject(uri("https://github.com/scalahub/BeanShell.git"))
 lazy val IrisReasoner = RootProject(uri("https://github.com/scalahub/iris-reasoner.git"))
 //lazy val IrisParser = ProjectRef(uri("git://github.com/scalahub/iris-reasoner.git"), "parser")
