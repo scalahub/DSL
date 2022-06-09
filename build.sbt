@@ -4,8 +4,17 @@ version := "0.1"
 
 scalaVersion := "2.12.10"
 
+lazy val commonResolvers = resolvers ++= Seq(
+  "Sonatype Releases" at "https://s01.oss.sonatype.org/content/repositories/releases",
+  "Sonatype Releases 2" at "https://oss.sonatype.org/content/repositories/releases/",
+  "SonaType" at "https://oss.sonatype.org/content/groups/public",
+  "SonaType Snapshots" at "https://s01.oss.sonatype.org/content/repositories/snapshots/",
+  "SonaType Staging" at "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+)
+
 lazy val TrapCommon = (project in file("TrapCommon"))
   .settings(
+    commonResolvers,
     libraryDependencies += "commons-codec" % "commons-codec" % "1.12",
     libraryDependencies += "commons-io" % "commons-io" % "2.6",
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
@@ -22,6 +31,7 @@ lazy val DSLToXDSL = (project in file("DSLToXDSL"))
 
 lazy val DSLCommon = (project in file("DSLCommon"))
   .settings(
+    commonResolvers,
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "javax.servlet" % "servlet-api" % "2.5" % "provided",
     libraryDependencies += "io.github.scalahub" %% "beanshell-mod" % "1.0"
@@ -36,7 +46,8 @@ lazy val XDSLLoader = (project in file("XDSLLoader"))
 
 lazy val DatalogSolver = (project in file("DatalogSolver"))
   .settings(
-    resolvers += Resolver.mavenLocal,
+    commonResolvers,
+    // resolvers += Resolver.mavenLocal,
     libraryDependencies += "commons-io" % "commons-io" % "2.6",
     libraryDependencies += "io.github.scalahub" %% "iris-reasoner-mod" % "1.0"
   )
