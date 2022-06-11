@@ -1,6 +1,6 @@
-name := "DQL"
+name := "DSL"
 
-version := "0.1"
+version := "1.0"
 
 scalaVersion := "2.12.10"
 
@@ -12,7 +12,7 @@ lazy val commonResolvers = resolvers ++= Seq(
   "SonaType Staging" at "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
 )
 
-lazy val TrapCommon = (project in file("TrapCommon"))
+lazy val dsl_util = (project in file("TrapCommon"))
   .settings(
     commonResolvers,
     libraryDependencies += "commons-codec" % "commons-codec" % "1.12",
@@ -22,29 +22,29 @@ lazy val TrapCommon = (project in file("TrapCommon"))
     libraryDependencies += "io.github.scalahub" %% "beanshell-mod" % "1.0"
   )
 
-lazy val DSLToXDSL = (project in file("DSLToXDSL"))
+lazy val dsl_to_xdsl = (project in file("DSLToXDSL"))
   .settings(
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "org.antlr" % "antlr" % "3.4"
   )
-  .dependsOn(TrapCommon)
+  .dependsOn(dsl_util)
 
-lazy val DSLCommon = (project in file("DSLCommon"))
+lazy val dsl_common = (project in file("DSLCommon"))
   .settings(
     commonResolvers,
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "javax.servlet" % "servlet-api" % "2.5" % "provided",
     libraryDependencies += "io.github.scalahub" %% "beanshell-mod" % "1.0"
   )
-  .dependsOn(TrapCommon)
+  .dependsOn(dsl_util)
 
-lazy val XDSLLoader = (project in file("XDSLLoader"))
+lazy val xdsl_loader = (project in file("XDSLLoader"))
   .settings(
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
   )
-  .dependsOn(TrapCommon, DSLCommon)
+  .dependsOn(dsl_util, dsl_common)
 
-lazy val DatalogSolver = (project in file("DatalogSolver"))
+lazy val datalog_solver = (project in file("DatalogSolver"))
   .settings(
     commonResolvers,
     // resolvers += Resolver.mavenLocal,
@@ -52,29 +52,29 @@ lazy val DatalogSolver = (project in file("DatalogSolver"))
     libraryDependencies += "io.github.scalahub" %% "iris-reasoner-mod" % "1.0"
   )
   .dependsOn(
-    XDSLLoader,
-    TrapCommon
+    xdsl_loader,
+    dsl_util
   )
 
-lazy val XDSLToDatalog = (project in file("XDSLToDatalog"))
+lazy val xdsl_to_datalog = (project in file("XDSLToDatalog"))
   .settings(
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "org.antlr" % "antlr" % "3.4"
   )
-  .dependsOn(XDSLLoader, DSLToXDSL)
+  .dependsOn(xdsl_loader, dsl_to_xdsl)
 
-lazy val DSLAnalyzer = (project in file("DSLAnalyzer"))
+lazy val dsl_analyzer = (project in file("DSLAnalyzer"))
   .settings(
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "commons-io" % "commons-io" % "2.6",
     libraryDependencies += "org.antlr" % "antlr" % "3.4"
   )
   .dependsOn(
-    XDSLToDatalog,
-    DatalogSolver
+    xdsl_to_datalog,
+    datalog_solver
   )
 
-lazy val DQLDemo = (project in file("DQLDemo"))
+lazy val dsl_demo = (project in file("DQLDemo"))
   .settings(
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
     libraryDependencies += "commons-io" % "commons-io" % "2.6",
@@ -83,19 +83,31 @@ lazy val DQLDemo = (project in file("DQLDemo"))
     libraryDependencies += "com.google.guava" % "guava" % "21.0",
     libraryDependencies += "commons-codec" % "commons-codec" % "1.12",
     libraryDependencies += "com.google.jimfs" % "jimfs" % "1.1" % Test,
-    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
+    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26",
+    mainClass in run := Some("dql.DQLConsole")
   )
   .dependsOn(
-    DSLAnalyzer
+    dsl_analyzer
   )
 
 lazy val root = (project in file("."))
   .settings(
+    publishArtifact := false,
     mainClass in assembly := Some("dql.DQLConsole"),
-    name := "DQL"
+    name := "DSL"
+  )
+  .aggregate(
+    dsl_demo,
+    dsl_util,
+    dsl_to_xdsl,
+    xdsl_to_datalog,
+    dsl_common,
+    xdsl_loader,
+    datalog_solver,
+    dsl_analyzer
   )
   .dependsOn(
-    DQLDemo
+    dsl_demo
   )
 
 mainClass in (Compile, run) := Some("dql.DQLConsole")
